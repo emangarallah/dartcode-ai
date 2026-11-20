@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 type SolveBody = {
+  clientId?: string;
   problemText?: string;
   sourceUrl?: string;
   difficulty?: "Easy" | "Medium" | "Hard";
@@ -103,14 +104,14 @@ async function generateWithGemini(prompt: string) {
 }
 
 async function saveHistory(body: SolveBody, answer: string) {
-  if (!process.env.DATABASE_URL) return;
+  if (!process.env.DATABASE_URL || !body.clientId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.clientId)) return;
   try {
     const sql = neon(process.env.DATABASE_URL);
     await sql`
       INSERT INTO solve_history
         (client_id, title, source_url, difficulty, mode, language, problem_text, answer_markdown)
       VALUES
-        (${"anonymous"}, ${body.title?.trim() || "Untitled problem"}, ${body.sourceUrl?.trim() || null},
+        (${body.clientId}, ${body.title?.trim() || "Untitled problem"}, ${body.sourceUrl?.trim() || null},
          ${body.difficulty || "Easy"}, ${body.mode || "coach"}, ${body.language || "Dart"},
          ${body.problemText || ""}, ${answer})
     `;

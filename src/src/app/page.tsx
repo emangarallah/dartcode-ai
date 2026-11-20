@@ -89,10 +89,15 @@ export default function HomePage() {
     if (!problem.trim()) { setError("اكتب نص المسألة أولاً."); return; }
     setLoading(true); setError(""); setAnswer(""); stopSpeech();
     try {
+      let clientId = window.localStorage.getItem("dartcode_client_id");
+      if (!clientId) {
+        clientId = window.crypto.randomUUID();
+        window.localStorage.setItem("dartcode_client_id", clientId);
+      }
       const response = await fetch("/api/solve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ problemText: problem.trim(), sourceUrl: url.trim(), difficulty, mode, language, title: title.trim() }),
+        body: JSON.stringify({ clientId, problemText: problem.trim(), sourceUrl: url.trim(), difficulty, mode, language, title: title.trim() }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "تعذر توليد الحل. حاول مرة أخرى.");
