@@ -154,15 +154,15 @@ export default function HomePage() {
           <div className="panel-heading answer-heading"><div className="heading-icon purple"><Bot size={20}/></div><div><h2>مساحة الشرح والحل</h2><p>هنا سيظهر تحليلك البرمجي</p></div><span className="ai-tag"><span/> AI ENGINE</span></div>
           {!answer && !loading && <div className="empty-state"><div className="empty-illustration"><Code2 size={39}/><Sparkles className="sparkle-one" size={17}/><span className="empty-orbit"/></div><h3>جاهز نبدأ التحدي؟</h3><p>أرسل المسألة، وسيقوم المدرب بتحليلها وشرح الفكرة وبناء الحل أمامك.</p><div className="empty-steps"><span><Check size={14}/> تحليل الفكرة</span><span><Check size={14}/> شرح الخوارزمية</span><span><Check size={14}/> كود قابل للنسخ</span></div></div>}
           {loading && <div className="loading-state"><div className="loading-ring"><Bot size={27}/></div><h3>نفكر في أفضل حل...</h3><p>نحلل المعطيات ونرتب خطوات الحل البرمجي.</p><div className="loading-bar"><span/></div></div>}
-          {answer && <div className="answer-content" dir="ltr">
+          {answer && <div className="answer-content" dir="rtl">
             <div className="answer-toolbar"><span><span className="status-dot"/> تم إنشاء الشرح</span><div className="toolbar-actions"><button type="button" onClick={copyAnswer} title="نسخ الشرح"><Copy size={15}/> نسخ</button><button type="button" onClick={() => { setAnswer(""); stopSpeech(); }} title="مسح النتيجة"><RotateCcw size={15}/></button></div></div>
-            <div className="answer-markdown">{renderAnswer(answer)}</div>
-            <div className="coach-audio"><div className="audio-icon"><AudioLines size={19}/></div><div className="audio-copy"><b>المدرب الصوتي</b><small>{voiceReady ? "استمع إلى الشرح بصوت المتصفح" : "استخدم الأصوات المثبتة في جهازك"}</small></div><div className="audio-controls">
+            <div className="answer-markdown" dir="rtl">{renderAnswer(answer)}</div>
+            <div className="coach-audio"><div className="audio-icon"><AudioLines size={19}/></div><div className="audio-copy"><b>المدرب الصوتي</b><small>{voiceReady ? "استمع إلى الشرح العربي بصوت المدرب" : "يتطلب الصوت دعماً من المتصفح وأصواتاً مثبتة على جهازك"}</small></div><div className="audio-controls">
               {!speaking && !paused ? <button type="button" onClick={speak} aria-label="تشغيل الشرح"><Play size={16} fill="currentColor"/></button> : <button type="button" onClick={() => { window.speechSynthesis.pause(); setPaused(true); setSpeaking(false); }} aria-label="إيقاف مؤقت"><Pause size={16}/></button>}
               {paused && <button type="button" onClick={speak} aria-label="استكمال الشرح"><Play size={15}/></button>}
               <button type="button" onClick={stopSpeech} aria-label="إيقاف الصوت"><CircleStop size={16}/></button>
             </div></div>
-            <p className="audio-hint"><Volume2 size={13}/> قد تختلف جودة الصوت واللغة حسب الأصوات المتاحة في المتصفح والجهاز.</p>
+            <p className="audio-hint"><Volume2 size={13}/> يقرأ المدرب الشرح بالعربية ويتجاوز مقاطع الكود حتى يبقى الكود باللغة الإنجليزية فقط.</p>
           </div>}
         </section>
       </div>
