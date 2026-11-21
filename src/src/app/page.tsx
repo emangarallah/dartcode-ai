@@ -33,10 +33,10 @@ function renderAnswer(markdown: string) {
   return output;
 }
 
-type FlowKind = "INPUT" | "PROCESS" | "DECISION" | "OUTPUT";
+type FlowKind = "INPUT" | "PROCESS" | "DECISION" | "OUTPUT" | "YES" | "NO" | "MERGE" | "LOOP";
 
 function flowKind(step: string): FlowKind {
-  const tagged = step.match(/^\[(INPUT|PROCESS|DECISION|OUTPUT)\]\s*/i);
+  const tagged = step.match(/^\[(INPUT|PROCESS|DECISION|OUTPUT|YES|NO|MERGE|LOOP)\]\s*/i);
   if (tagged) return tagged[1].toUpperCase() as FlowKind;
   if (/\b(if|else if|while|for each|otherwise)\b|إذا|هل|تحقق من|هل يوجد|هل يساوي|أكبر من|أصغر من|يساوي|مقارنة|شرط/i.test(step)) return "DECISION";
   if (/اقرأ|استقبل|أدخل|إدخال|من المستخدم|من المدخلات/i.test(step)) return "INPUT";
@@ -45,7 +45,7 @@ function flowKind(step: string): FlowKind {
 }
 
 function flowText(step: string): string {
-  return step.replace(/^\[(?:INPUT|PROCESS|DECISION|OUTPUT)\]\s*/i, "").trim();
+  return step.replace(/^\[(?:INPUT|PROCESS|DECISION|OUTPUT|YES|NO|MERGE|LOOP)\]\s*/i, "").trim();
 }
 
 function extractExecutionTrace(markdown: string): { content: string; steps: string[] } {
@@ -145,6 +145,24 @@ export default function HomePage() {
   const [voiceReady, setVoiceReady] = useState(false);
   const speechQueueRef = useRef<string[]>([]);
   const speechCursorRef = useRef(0);
+  const flowRows = useMemo(() => {
+    const rows: Array<{ type: "node"; step: string; index: number } | { type: "branch"; decision: string; decisionIndex: number; yes: string; yesIndex: number; no: string; noIndex: number }> = [];
+    for (let i = 0; i < traceSteps.length; i += 1) {
+      if (flowKind(traceSteps[i]) === "DECISION" && i + 2 < traceSteps.length) {
+        const nextA = flowKind(traceSteps[i + 1]);
+        const nextB = flowKind(traceSteps[i + 2]);
+        if ((nextA === "YES" && nextB === "NO") || (nextA === "NO" && nextB === "YES")) {
+          const yesIndex = nextA === "YES" ? i + 1 : i + 2;
+          const noIndex = nextA === "NO" ? i + 1 : i + 2;
+          rows.push({ type: "branch", decision: traceSteps[i], decisionIndex: i, yes: traceSteps[yesIndex], yesIndex, no: traceSteps[noIndex], noIndex });
+          i += 2;
+          continue;
+        }
+      }
+      rows.push({ type: "node", step: traceSteps[i], index: i });
+    }
+    return rows;
+  }, [traceSteps]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -349,15 +367,34 @@ export default function HomePage() {
               <div className="flowchart">
                 <div className="flow-terminal">بداية</div>
                 <div className="flow-line"><i/></div>
-                {traceSteps.map((step, index) => {
-                  const kind = flowKind(step);
-                  const decision = kind === "DECISION";
+                {flowRows.map((row, rowIndex) => {
+                  if (row.type === "branch") {
+                    const decisionActive = row.decisionIndex === traceIndex;
+                    const branchButton = (step: string, index: number, label: string) => (
+                      <button type="button" className={`flow-node process-node branch-node ${index === traceIndex ? "active" : index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(index)} aria-label={`${label}: ${flowText(step)}`}>
+                        <span className="flow-label"><small>{String(index + 1).padStart(2, "0")}</small><span>{flowText(step)}</span></span>
+                      </button>
+                    );
+                    return <div className="flow-branch-group" key={row.decisionIndex}>
+                      <div className="flow-item">
+                        <button type="button" className={`flow-node decision-node ${decisionActive ? "active" : row.decisionIndex < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(row.decisionIndex)} aria-label={`قرار: ${flowText(row.decision)}`}>
+                          <span className="flow-label"><small>{String(row.decisionIndex + 1).padStart(2, "0")}</small><span>{flowText(row.decision)}</span></span>
+                        </button>
+                      </div>
+                      <div className="branch-connectors"><span>نعم</span><span>لا</span></div>
+                      <div className="flow-branch-columns">
+                        <div className="flow-branch-column">{branchButton(row.yes, row.yesIndex, "مسار نعم")}</div>
+                        <div className="flow-branch-column">{branchButton(row.no, row.noIndex, "مسار لا")}</div>
+                      </div>
+                      <div className="branch-merge-line"><i/></div>
+                    </div>;
+                  }
+                  const kind = flowKind(row.step);
                   const shape = kind === "DECISION" ? "decision-node" : kind === "INPUT" || kind === "OUTPUT" ? "io-node" : "process-node";
-                  return <div className={`flow-item ${decision ? "decision-flow" : ""}`} key={index}>
-                    <button type="button" className={`flow-node ${shape} ${index === traceIndex ? "active" : index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(index)} aria-label={`الخطوة ${index + 1}: ${step}`}>
-                      <span className="flow-label"><small>{String(index + 1).padStart(2, "0")}</small><span>{step}</span></span>
+                  return <div className="flow-item" key={row.index}>
+                    <button type="button" className={`flow-node ${shape} ${row.index === traceIndex ? "active" : row.index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(row.index)} aria-label={`الخطوة ${row.index + 1}: ${flowText(row.step)}`}>
+                      <span className="flow-label"><small>{String(row.index + 1).padStart(2, "0")}</small><span>{flowText(row.step)}</span></span>
                     </button>
-                    {decision && <div className="decision-branches" aria-label="مسارا القرار"><span>نعم ↓</span><span>لا ↘ متابعة</span></div>}
                     <div className="flow-line"><i/></div>
                   </div>;
                 })}
