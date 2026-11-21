@@ -55,8 +55,8 @@ function extractExecutionTrace(markdown: string): { content: string; steps: stri
 
 
 function ComplexityChart({ answer }: { answer: string }) {
-  const normalized = answer.toLowerCase().replace(/²/g, "^2").replace(/\\s+/g, "");
-  const selected = normalized.match(/o\\((?:n\\*\\*2|n\\^2|n\\*n|nlogn|n|logn|1)\\)/)?.[0] || "";
+  const normalized = answer.toLowerCase().replace(/²/g, "^2").replace(/\s+/g, "");
+  const selected = normalized.match(/o\((?:n\*\*2|n\^2|n\*n|nlogn|n|logn|1)\)/)?.[0] || "";
   const active = selected.includes("n^2") || selected.includes("n*n") || selected.includes("n**2") ? "n2"
     : selected.includes("nlogn") ? "nlogn"
     : selected.includes("logn") ? "logn"
