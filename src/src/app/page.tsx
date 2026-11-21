@@ -33,29 +33,44 @@ function renderAnswer(markdown: string) {
   return output;
 }
 
+type FlowKind = "INPUT" | "PROCESS" | "DECISION" | "OUTPUT";
+
+function flowKind(step: string): FlowKind {
+  const tagged = step.match(/^\\[(INPUT|PROCESS|DECISION|OUTPUT)\\]\\s*/i);
+  if (tagged) return tagged[1].toUpperCase() as FlowKind;
+  if (/\\b(if|else if|while|for each|otherwise)\\b|إذا|هل|تحقق من|هل يوجد|هل يساوي|أكبر من|أصغر من|يساوي|مقارنة|شرط/i.test(step)) return "DECISION";
+  if (/اقرأ|استقبل|أدخل|إدخال|من المستخدم|من المدخلات/i.test(step)) return "INPUT";
+  if (/أرجع|إرجاع|اطبع|اعرض|أخرج|الناتج النهائي|النتيجة النهائية|output|return|print/i.test(step)) return "OUTPUT";
+  return "PROCESS";
+}
+
+function flowText(step: string): string {
+  return step.replace(/^\\[(?:INPUT|PROCESS|DECISION|OUTPUT)\\]\\s*/i, "").trim();
+}
+
 function extractExecutionTrace(markdown: string): { content: string; steps: string[] } {
-  const lines = markdown.split(/\r?\n/);
-  const heading = /^##\s+(?:مخطط سير الخوارزمية|تتبّع التنفيذ|تتبع التنفيذ)\s*$/;
+  const lines = markdown.split(/\\r?\\n/);
+  const heading = /^##\\s+(?:مخطط سير الخوارزمية|تتبّع التنفيذ|تتبع التنفيذ)\\s*$/;
   const start = lines.findIndex((line) => heading.test(line.trim()));
   const methodStart = start < 0
-    ? lines.findIndex((line) => /^##\s+طريقة الحل\s*$/.test(line.trim()))
+    ? lines.findIndex((line) => /^##\\s+طريقة الحل\\s*$/.test(line.trim()))
     : start;
   if (methodStart < 0) return { content: markdown, steps: [] };
 
-  let end = lines.findIndex((line, index) => index > methodStart && /^##\s+/.test(line.trim()));
+  let end = lines.findIndex((line, index) => index > methodStart && /^##\\s+/.test(line.trim()));
   if (end < 0) end = lines.length;
 
   let steps = lines
     .slice(methodStart + 1, end)
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && !line.startsWith("```"))
-    .map((line) => line.replace(/^[-*]\s*/, "").replace(/^\d+[.)]\s*/, "").trim())
+    .map((line) => line.replace(/^[-*]\\s*/, "").replace(/^\\d+[.)]\\s*/, "").trim())
     .filter(Boolean);
 
   if (steps.length === 0) {
     steps = lines.slice(methodStart + 1, end)
       .join(" ")
-      .split(/[.!؟؛]\s+/)
+      .split(/[.!؟؛]\\s+/)
       .map((step) => step.trim())
       .filter((step) => step.length > 18)
       .slice(0, 7);
@@ -63,10 +78,9 @@ function extractExecutionTrace(markdown: string): { content: string; steps: stri
 
   const content = start < 0
     ? markdown
-    : [...lines.slice(0, start), ...lines.slice(end)].join("\n").trim();
+    : [...lines.slice(0, start), ...lines.slice(end)].join("\\n").trim();
   return { content, steps: steps.slice(0, 8) };
 }
-
 
 function ComplexityChart({ answer }: { answer: string }) {
   const normalized = answer.toLowerCase().replace(/²/g, "^2").replace(/\s+/g, "");
@@ -167,7 +181,7 @@ export default function HomePage() {
 
     window.speechSynthesis.cancel();
     const segments = traceSteps.length
-      ? traceSteps.map((step, index) => `الخطوة ${index + 1}. ${step}`)
+      ? traceSteps.map((step, index) => `الخطوة ${index + 1}. ${flowText(step)}`)
       : [spokenText];
     if (!segments.some((segment) => segment.trim())) return;
 
@@ -303,7 +317,7 @@ export default function HomePage() {
                     aria-current={index === traceIndex ? "step" : undefined}
                   >
                     <span className="console-number">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="console-step-text" dir="rtl">{step}</span>
+                    <span className="console-step-text" dir="rtl">{flowText(step)}</span>
                     {index === traceIndex && <span className="console-caret" aria-hidden="true">▋</span>}
                   </button>
                 )) : (
@@ -336,9 +350,9 @@ export default function HomePage() {
                 <div className="flow-terminal">بداية</div>
                 <div className="flow-line"><i/></div>
                 {traceSteps.map((step, index) => {
-                  const decision = /إذا|هل |تحقق|مقارنة|شرط|يساوي|أكبر|أصغر|وجود|موجود|otherwise|if\\b|while\\b/i.test(step);
-                  const inputOutput = /اقرأ|استقبل|أدخل|إدخال|مدخل|أرجع|أعد|إرجاع|اطبع|اعرض|نتيجة|مخرج|output|return|print/i.test(step);
-                  const shape = decision ? "decision-node" : inputOutput ? "io-node" : "process-node";
+                  const kind = flowKind(step);
+                  const decision = kind === "DECISION";
+                  const shape = kind === "DECISION" ? "decision-node" : kind === "INPUT" || kind === "OUTPUT" ? "io-node" : "process-node";
                   return <div className={`flow-item ${decision ? "decision-flow" : ""}`} key={index}>
                     <button type="button" className={`flow-node ${shape} ${index === traceIndex ? "active" : index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(index)} aria-label={`الخطوة ${index + 1}: ${step}`}>
                       <span className="flow-label"><small>{String(index + 1).padStart(2, "0")}</small><span>{step}</span></span>
