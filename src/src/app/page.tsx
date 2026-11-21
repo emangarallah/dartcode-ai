@@ -336,11 +336,14 @@ export default function HomePage() {
                 <div className="flow-terminal">بداية</div>
                 <div className="flow-line"><i/></div>
                 {traceSteps.map((step, index) => {
-                  const decision = /إذا|هل |تحقق|مقارنة|شرط|otherwise|if\b/i.test(step);
-                  return <div className="flow-item" key={index}>
-                    <button type="button" className={`flow-node ${decision ? "decision-node " : ""}${index === traceIndex ? "active" : index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(index)}>
-                      <small>{String(index + 1).padStart(2, "0")}</small><span>{step}</span>{decision && <em>قرار</em>}
+                  const decision = /إذا|هل |تحقق|مقارنة|شرط|يساوي|أكبر|أصغر|وجود|موجود|otherwise|if\\b|while\\b/i.test(step);
+                  const inputOutput = /اقرأ|استقبل|أدخل|إدخال|مدخل|أرجع|أعد|إرجاع|اطبع|اعرض|نتيجة|مخرج|output|return|print/i.test(step);
+                  const shape = decision ? "decision-node" : inputOutput ? "io-node" : "process-node";
+                  return <div className={`flow-item ${decision ? "decision-flow" : ""}`} key={index}>
+                    <button type="button" className={`flow-node ${shape} ${index === traceIndex ? "active" : index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(index)} aria-label={`الخطوة ${index + 1}: ${step}`}>
+                      <span className="flow-label"><small>{String(index + 1).padStart(2, "0")}</small><span>{step}</span></span>
                     </button>
+                    {decision && <div className="decision-branches" aria-label="مسارا القرار"><span>نعم ↓</span><span>لا ↘ متابعة</span></div>}
                     <div className="flow-line"><i/></div>
                   </div>;
                 })}
