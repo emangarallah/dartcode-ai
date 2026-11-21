@@ -275,7 +275,7 @@ export default function HomePage() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#"><span className="brand-mark"><Code2 size={23}/></span><span>EmiCode<small>LEARN · THINK · SOLVE</small></span></a>
+        <a className="brand" href="#"><span className="brand-mark"><Code2 size={23}/></span><span>CodeEmi<small>LEARN · THINK · SOLVE</small></span></a>
         <div className="topbar-right"><span className="status-dot"/> مدربك البرمجي الذكي <span className="top-pill">BETA</span></div>
       </header>
 
@@ -412,7 +412,7 @@ export default function HomePage() {
           </div>}
         </section>
       </div>
-      <footer className="footer"><span>EmiCode</span><span>صُمّم ليحوّل طريقة تعلّمك للبرمجة <span className="footer-heart">♥</span></span><span>BUILD YOUR LOGIC.</span></footer>
+      <footer className="footer"><span>CodeEmi</span><span>صُمّم ليحوّل طريقة تعلّمك للبرمجة <span className="footer-heart">♥</span></span><span>BUILD YOUR LOGIC.</span></footer>
     </main>
   );
 }
