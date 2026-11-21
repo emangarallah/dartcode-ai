@@ -53,6 +53,53 @@ function extractExecutionTrace(markdown: string): { content: string; steps: stri
   return { content, steps };
 }
 
+
+function ComplexityChart({ answer }: { answer: string }) {
+  const normalized = answer.toLowerCase().replace(/²/g, "^2").replace(/\\s+/g, "");
+  const selected = normalized.match(/o\\((?:n\\*\\*2|n\\^2|n\\*n|nlogn|n|logn|1)\\)/)?.[0] || "";
+  const active = selected.includes("n^2") || selected.includes("n*n") || selected.includes("n**2") ? "n2"
+    : selected.includes("nlogn") ? "nlogn"
+    : selected.includes("logn") ? "logn"
+    : selected.includes("o(n)") ? "n"
+    : selected.includes("o(1)") ? "one" : "";
+  const curves = [
+    { id: "one", label: "O(1)", color: "#66d9d0", fn: (n: number) => 12 },
+    { id: "logn", label: "O(log n)", color: "#8b7cff", fn: (n: number) => 12 + Math.log2(n) * 12 },
+    { id: "n", label: "O(n)", color: "#e8bd62", fn: (n: number) => n * 12 },
+    { id: "nlogn", label: "O(n log n)", color: "#62c997", fn: (n: number) => n * Math.log2(n) * 3.7 },
+    { id: "n2", label: "O(n²)", color: "#f07888", fn: (n: number) => n * n * 1.45 },
+  ];
+  const pathFor = (fn: (n: number) => number) =>
+    Array.from({ length: 10 }, (_, i) => {
+      const x = 48 + i * 54;
+      const y = 204 - Math.min(160, fn(i + 1));
+      return `${i === 0 ? "M" : "L"} ${x} ${y}`;
+    }).join(" ");
+  return (
+    <section className="complexity-chart" dir="rtl" aria-label="مخطط مقارنة التعقيد الزمني">
+      <div className="chart-heading">
+        <div><h3>مخطط نمو التعقيد الزمني</h3><p>مقارنة سرعة نمو الخوارزميات مع زيادة حجم الإدخال</p></div>
+        <span className="chart-tag">BIG O</span>
+      </div>
+      <div className="chart-scroll" dir="ltr">
+        <svg className="complexity-svg" viewBox="0 0 590 250" role="img" aria-label="منحنيات مقارنة O واحد و O لوغاريتمي و O n و O n log n و O n تربيع">
+          {[44, 84, 124, 164, 204].map((y) => <line key={y} x1="48" y1={y} x2="534" y2={y} className="chart-gridline" />)}
+          <line x1="48" y1="28" x2="48" y2="204" className="chart-axis"/>
+          <line x1="48" y1="204" x2="534" y2="204" className="chart-axis"/>
+          {[1, 3, 5, 7, 9].map((n) => <text key={n} x={48 + (n - 1) * 54} y="224" className="chart-tick" textAnchor="middle">{n}</text>)}
+          <text x="290" y="244" className="chart-axis-label" textAnchor="middle">حجم الإدخال (n)</text>
+          <text x="14" y="116" className="chart-axis-label" textAnchor="middle" transform="rotate(-90 14 116)">العمليات النسبية</text>
+          {curves.map((curve) => <path key={curve.id} d={pathFor(curve.fn)} fill="none" stroke={curve.color} strokeWidth={active === curve.id ? 4 : 2} opacity={!active || active === curve.id ? 1 : .38} strokeLinecap="round" strokeLinejoin="round" className={active === curve.id ? "chart-line selected" : "chart-line"}/>)}
+        </svg>
+      </div>
+      <div className="chart-legend">
+        {curves.map((curve) => <span key={curve.id} className={active === curve.id ? "chart-legend-item selected" : "chart-legend-item"}><i style={{ background: curve.color }}/>{curve.label}</span>)}
+      </div>
+      <p className="chart-footnote">{active ? `تم إبراز المنحنى الأقرب للتعقيد المذكور في الشرح: ${curves.find((curve) => curve.id === active)?.label}.` : "يعرض المخطط مقارنة تعليمية عامة. أضف Big O بصيغة O(n) أو O(log n) في الشرح ليتم إبراز المنحنى تلقائياً."}</p>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const [problem, setProblem] = useState("");
   const [url, setUrl] = useState("");
@@ -282,6 +329,7 @@ export default function HomePage() {
                 ))}
               </div>
             </section>
+            <ComplexityChart answer={answer} />
             <div className="coach-audio"><div className="audio-icon"><AudioLines size={19}/></div><div className="audio-copy"><b>المدرب الصوتي</b><small>{voiceReady ? "يتزامن صوت المدرب مع إبراز كل خطوة في المخطط" : "يتطلب الصوت دعماً من المتصفح وأصواتاً مثبتة على جهازك"}</small></div><div className="audio-controls">
               {!speaking && !paused ? <button type="button" onClick={speak} aria-label="تشغيل الشرح"><Play size={16} fill="currentColor"/></button> : <button type="button" onClick={() => { window.speechSynthesis.pause(); setPaused(true); setSpeaking(false); }} aria-label="إيقاف مؤقت"><Pause size={16}/></button>}
               {paused && <button type="button" onClick={speak} aria-label="استكمال الشرح"><Play size={15}/></button>}
