@@ -163,3 +163,51 @@
 .branch-merge-line:before{left:25%}.branch-merge-line:after{right:25%}
 .branch-merge-line i{position:absolute;bottom:-1px;left:50%;height:28px;border-left:2px solid #eee}
 @media(max-width:520px){.algorithm-map{padding:12px}.flow-branch-columns,.branch-connectors{gap:8px}.flow-branch-column .branch-node{min-height:76px;padding:7px 5px;font-size:10px}.flow-branch-column .flow-label{gap:4px}.flow-branch-column .flow-label small{display:none}.branch-merge-line{width:100%}}
+
+
+/* Flowchart refinement: readable branch routing, loop-back cue and responsive spacing */
+.algorithm-map{padding:clamp(12px,2.5vw,24px);background:#111;border-color:#343434}
+.algorithm-map .flowchart{width:100%;max-width:900px;margin-inline:auto}
+.algorithm-map .flow-item{position:relative}
+.algorithm-map .flow-node{width:min(100%,520px);min-height:64px;padding:12px 18px;font-size:clamp(10px,1.2vw,13px);line-height:1.7;overflow-wrap:anywhere}
+.algorithm-map .flow-label{gap:12px}
+.algorithm-map .flow-label small{flex-basis:28px}
+.algorithm-map .flow-node.decision-node{width:min(100%,350px);min-height:154px}
+.algorithm-map .flow-node.decision-node:before{inset:16px 58px}
+.algorithm-map .flow-node.decision-node .flow-label{width:68%;min-height:100px}
+.flow-branch-group{position:relative;padding-bottom:2px}
+.flow-branch-group>.flow-item{z-index:1}
+.branch-connectors{position:relative;width:min(100%,660px);height:44px;display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 auto;color:#fff;font-size:11px;font-weight:700}
+.branch-connectors:before{content:"";position:absolute;top:0;left:25%;right:25%;height:20px;border-top:2px solid #eee;border-left:2px solid #eee;border-right:2px solid #eee}
+.branch-connectors span{position:relative;display:flex;justify-content:center;align-items:flex-end;padding-bottom:3px}
+.branch-connectors span:before{content:"";position:absolute;bottom:0;height:19px;border-left:2px solid #eee}
+.flow-branch-columns{width:min(100%,660px);gap:clamp(10px,3vw,28px);padding-top:0}
+.flow-branch-column{align-items:flex-start}
+.flow-branch-column:before{display:none}
+.flow-branch-column .branch-node{max-width:100%;min-height:72px;padding:10px 12px}
+.flow-branch-column .flow-label{gap:7px}
+.flow-branch-column .flow-label small{flex-basis:24px;height:24px}
+.branch-merge-line{height:38px;width:min(100%,660px);border:0;margin-top:0}
+.branch-merge-line:before,.branch-merge-line:after{top:0;height:18px}
+.branch-merge-line:before{left:25%}.branch-merge-line:after{right:25%}
+.branch-merge-line i{bottom:0;height:20px}
+.loop-flow:after{content:"↶";position:absolute;left:calc(50% - min(260px, 48%));top:50%;transform:translateY(-50%);width:34px;height:34px;display:grid;place-items:center;border:1px solid #e7c66e;border-radius:50%;background:#171717;color:#f2d58e;font-size:22px}
+.loop-back-label{position:absolute;left:calc(50% - min(300px, 48%));top:calc(50% + 22px);max-width:110px;color:#f2d58e;font-size:9px;text-align:center}
+.algorithm-map .flow-terminal{font-size:13px;letter-spacing:.02em}
+.algorithm-map .end-terminal{margin-top:0}
+@media(max-width:520px){
+ .algorithm-map{padding:10px}
+ .algorithm-map .flow-node{min-height:58px;padding:9px 8px;font-size:10px}
+ .algorithm-map .flow-node.decision-node{min-height:124px}
+ .algorithm-map .flow-node.decision-node:before{inset:12px 40px}
+ .algorithm-map .flow-node.decision-node .flow-label{width:72%;min-height:82px}
+ .branch-connectors{height:38px}
+ .branch-connectors:before{top:0;height:17px}
+ .branch-connectors span:before{height:17px}
+ .flow-branch-columns{gap:8px}
+ .flow-branch-column .branch-node{min-height:76px;padding:7px 6px;font-size:9px}
+ .flow-branch-column .flow-label small{display:none}
+ .branch-merge-line{height:28px}
+ .loop-flow:after{left:3px;width:26px;height:26px;font-size:17px}
+ .loop-back-label{left:0;top:calc(50% + 17px);max-width:64px;font-size:8px}
+}
