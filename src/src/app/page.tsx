@@ -36,41 +36,41 @@ function renderAnswer(markdown: string) {
 type FlowKind = "INPUT" | "PROCESS" | "DECISION" | "OUTPUT";
 
 function flowKind(step: string): FlowKind {
-  const tagged = step.match(/^\\[(INPUT|PROCESS|DECISION|OUTPUT)\\]\\s*/i);
+  const tagged = step.match(/^\[(INPUT|PROCESS|DECISION|OUTPUT)\]\s*/i);
   if (tagged) return tagged[1].toUpperCase() as FlowKind;
-  if (/\\b(if|else if|while|for each|otherwise)\\b|إذا|هل|تحقق من|هل يوجد|هل يساوي|أكبر من|أصغر من|يساوي|مقارنة|شرط/i.test(step)) return "DECISION";
+  if (/\b(if|else if|while|for each|otherwise)\b|إذا|هل|تحقق من|هل يوجد|هل يساوي|أكبر من|أصغر من|يساوي|مقارنة|شرط/i.test(step)) return "DECISION";
   if (/اقرأ|استقبل|أدخل|إدخال|من المستخدم|من المدخلات/i.test(step)) return "INPUT";
   if (/أرجع|إرجاع|اطبع|اعرض|أخرج|الناتج النهائي|النتيجة النهائية|output|return|print/i.test(step)) return "OUTPUT";
   return "PROCESS";
 }
 
 function flowText(step: string): string {
-  return step.replace(/^\\[(?:INPUT|PROCESS|DECISION|OUTPUT)\\]\\s*/i, "").trim();
+  return step.replace(/^\[(?:INPUT|PROCESS|DECISION|OUTPUT)\]\s*/i, "").trim();
 }
 
 function extractExecutionTrace(markdown: string): { content: string; steps: string[] } {
-  const lines = markdown.split(/\\r?\\n/);
-  const heading = /^##\\s+(?:مخطط سير الخوارزمية|تتبّع التنفيذ|تتبع التنفيذ)\\s*$/;
+  const lines = markdown.split(/\r?\n/);
+  const heading = /^##\s+(?:مخطط سير الخوارزمية|تتبّع التنفيذ|تتبع التنفيذ)\s*$/;
   const start = lines.findIndex((line) => heading.test(line.trim()));
   const methodStart = start < 0
-    ? lines.findIndex((line) => /^##\\s+طريقة الحل\\s*$/.test(line.trim()))
+    ? lines.findIndex((line) => /^##\s+طريقة الحل\s*$/.test(line.trim()))
     : start;
   if (methodStart < 0) return { content: markdown, steps: [] };
 
-  let end = lines.findIndex((line, index) => index > methodStart && /^##\\s+/.test(line.trim()));
+  let end = lines.findIndex((line, index) => index > methodStart && /^##\s+/.test(line.trim()));
   if (end < 0) end = lines.length;
 
   let steps = lines
     .slice(methodStart + 1, end)
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && !line.startsWith("```"))
-    .map((line) => line.replace(/^[-*]\\s*/, "").replace(/^\\d+[.)]\\s*/, "").trim())
+    .map((line) => line.replace(/^[-*]\s*/, "").replace(/^\d+[.)]\s*/, "").trim())
     .filter(Boolean);
 
   if (steps.length === 0) {
     steps = lines.slice(methodStart + 1, end)
       .join(" ")
-      .split(/[.!؟؛]\\s+/)
+      .split(/[.!؟؛]\s+/)
       .map((step) => step.trim())
       .filter((step) => step.length > 18)
       .slice(0, 7);
@@ -78,7 +78,7 @@ function extractExecutionTrace(markdown: string): { content: string; steps: stri
 
   const content = start < 0
     ? markdown
-    : [...lines.slice(0, start), ...lines.slice(end)].join("\\n").trim();
+    : [...lines.slice(0, start), ...lines.slice(end)].join("\n").trim();
   return { content, steps: steps.slice(0, 8) };
 }
 
