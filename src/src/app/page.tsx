@@ -79,7 +79,7 @@ function extractExecutionTrace(markdown: string): { content: string; steps: stri
   const content = start < 0
     ? markdown
     : [...lines.slice(0, start), ...lines.slice(end)].join("\n").trim();
-  return { content, steps: steps.slice(0, 8) };
+  return { content, steps: steps.slice(0, 16) };
 }
 
 function ComplexityChart({ answer }: { answer: string }) {
@@ -391,10 +391,11 @@ export default function HomePage() {
                   }
                   const kind = flowKind(row.step);
                   const shape = kind === "DECISION" ? "decision-node" : kind === "INPUT" || kind === "OUTPUT" ? "io-node" : "process-node";
-                  return <div className="flow-item" key={row.index}>
+                  return <div className={`flow-item ${kind === "LOOP" ? "loop-flow" : ""}`} key={row.index}>
                     <button type="button" className={`flow-node ${shape} ${row.index === traceIndex ? "active" : row.index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(row.index)} aria-label={`الخطوة ${row.index + 1}: ${flowText(row.step)}`}>
                       <span className="flow-label"><small>{String(row.index + 1).padStart(2, "0")}</small><span>{flowText(row.step)}</span></span>
                     </button>
+                    {kind === "LOOP" && <span className="loop-back-label">عودة إلى الشرط · تكرار</span>}
                     <div className="flow-line"><i/></div>
                   </div>;
                 })}
