@@ -15,3 +15,34 @@
 .coach-audio{direction:rtl}
 .audio-controls{margin-right:auto;margin-left:0;direction:ltr}
 .audio-hint{direction:rtl;text-align:right}
+
+
+/* Black terminal-style algorithm trace. */
+.execution-console{margin:18px 0 21px;background:#030507;border:1px solid #252d3b;border-radius:12px;overflow:hidden;box-shadow:0 14px 34px #0005;color:#d8e4e8;direction:ltr}
+.console-topbar{height:43px;padding:0 13px;display:flex;align-items:center;gap:12px;background:#0b0e13;border-bottom:1px solid #1c2630}
+.console-lights{display:flex;align-items:center;gap:5px}
+.console-lights i{width:8px;height:8px;border-radius:50%;background:#f07178}
+.console-lights i:nth-child(2){background:#e8bd62}
+.console-lights i:nth-child(3){background:#62c997}
+.console-heading{display:flex;align-items:center;gap:7px;color:#a8c7c7;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px}
+.console-heading svg{color:#64d6c1}
+.console-status{margin-left:auto;color:#67d8a4;font:9px 'IBM Plex Mono',monospace;letter-spacing:.8px}
+.console-status.unavailable{color:#e5ae65}
+.console-content{padding:12px 10px;max-height:340px;min-height:112px;overflow:auto;background:radial-gradient(ellipse at 0 0,#0a1720 0,transparent 55%),#030507}
+.console-step{width:100%;display:grid;grid-template-columns:29px minmax(0,1fr) 10px;align-items:start;gap:8px;padding:8px 9px;margin:2px 0;border:1px solid transparent;border-radius:7px;background:transparent;color:#9aa8b2;text-align:left;transition:background .18s,border-color .18s,color .18s}
+.console-step:hover{background:#0c141b;color:#d9e8e7}
+.console-step.active{background:#101d24;border-color:#23443f;color:#d8f5ed}
+.console-number{padding-top:2px;color:#579b91;font:10px 'IBM Plex Mono',monospace;text-align:left}
+.console-step-text{font:12px/1.9 'IBM Plex Sans Arabic',sans-serif;text-align:right;overflow-wrap:anywhere}
+.console-caret{align-self:center;color:#69e4c6;font:14px 'IBM Plex Mono',monospace;animation:consoleBlink 1s steps(2,start) infinite}
+@keyframes consoleBlink{to{visibility:hidden}}
+.console-empty{min-height:85px;display:grid;place-items:center;text-align:center;color:#a2aaba;font-size:11px;line-height:1.9;padding:12px}
+.console-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#090c11;border-top:1px solid #1c2630}
+.console-counter{color:#80919b;font-size:10px}
+.console-counter b{color:#78d9c4;font-family:'IBM Plex Mono',monospace}
+.console-control-buttons{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.console-control-buttons button{display:flex;align-items:center;gap:4px;padding:6px 9px;border:1px solid #293741;border-radius:6px;background:#111923;color:#c2d3d5;font-size:10px}
+.console-control-buttons button:hover:not(:disabled){border-color:#4a8e83;background:#15252a}
+.console-control-buttons button:disabled{opacity:.35;cursor:not-allowed}
+.console-note{margin:0;padding:8px 12px 10px;color:#657983;font-size:9px;line-height:1.8;background:#07090d}
+@media(max-width:520px){.console-topbar{height:40px;padding:0 10px;gap:8px}.console-heading{font-size:9px}.console-status{font-size:8px}.console-content{padding:9px 6px;max-height:380px}.console-step{grid-template-columns:24px minmax(0,1fr) 8px;gap:5px;padding:8px 6px}.console-step-text{font-size:11px;line-height:1.85}.console-controls{align-items:flex-start}.console-control-buttons{width:100%;justify-content:space-between}.console-control-buttons button{padding:7px 8px}}

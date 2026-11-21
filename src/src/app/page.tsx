@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { AudioLines, BookOpen, Bot, Check, ChevronDown, CircleStop, Code2, Copy, ExternalLink, Headphones, Loader2, Pause, Play, RotateCcw, Send, Sparkles, Volume2 } from "lucide-react";
+import { AudioLines, BookOpen, Bot, Check, ChevronDown, ChevronLeft, ChevronRight, CircleStop, Code2, Copy, ExternalLink, Headphones, Loader2, Pause, Play, RotateCcw, Send, Sparkles, Terminal, Volume2 } from "lucide-react";
 
 type Difficulty = "Easy" | "Medium" | "Hard";
 type Mode = "coach" | "direct";
@@ -33,6 +33,26 @@ function renderAnswer(markdown: string) {
   return output;
 }
 
+function extractExecutionTrace(markdown: string): { content: string; steps: string[] } {
+  const lines = markdown.split(/\r?\n/);
+  const heading = /^##\s+(?:تتبّع التنفيذ|تتبع التنفيذ)\s*$/;
+  const start = lines.findIndex((line) => heading.test(line.trim()));
+  if (start < 0) return { content: markdown, steps: [] };
+
+  let end = lines.findIndex((line, index) => index > start && /^##\s+/.test(line.trim()));
+  if (end < 0) end = lines.length;
+
+  const steps = lines
+    .slice(start + 1, end)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("```"))
+    .map((line) => line.replace(/^[-*]\s*/, "").replace(/^\d+[.)]\s*/, "").trim())
+    .filter(Boolean);
+
+  const content = [...lines.slice(0, start), ...lines.slice(end)].join("\n").trim();
+  return { content, steps };
+}
+
 export default function HomePage() {
   const [problem, setProblem] = useState("");
   const [url, setUrl] = useState("");
@@ -40,6 +60,8 @@ export default function HomePage() {
   const [mode, setMode] = useState<Mode>("coach");
   const [language, setLanguage] = useState<Language>("Dart");
   const [answer, setAnswer] = useState("");
+  const [traceSteps, setTraceSteps] = useState<string[]>([]);
+  const [traceIndex, setTraceIndex] = useState(0);
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -87,7 +109,7 @@ export default function HomePage() {
   async function solve(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!problem.trim()) { setError("اكتب نص المسألة أولاً."); return; }
-    setLoading(true); setError(""); setAnswer(""); stopSpeech();
+    setLoading(true); setError(""); setAnswer(""); setTraceSteps([]); setTraceIndex(0); stopSpeech();
     try {
       let clientId = window.localStorage.getItem("dartcode_client_id");
       if (!clientId) {
@@ -101,7 +123,11 @@ export default function HomePage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "تعذر توليد الحل. حاول مرة أخرى.");
-      setAnswer(data.answer || "");
+      const generatedAnswer = data.answer || "";
+      const parsedAnswer = extractExecutionTrace(generatedAnswer);
+      setAnswer(parsedAnswer.content || generatedAnswer);
+      setTraceSteps(parsedAnswer.steps);
+      setTraceIndex(0);
     } catch (err) {
       setError(err instanceof Error ? err.message : "حدث خطأ غير متوقع.");
     } finally { setLoading(false); }
@@ -155,8 +181,53 @@ export default function HomePage() {
           {!answer && !loading && <div className="empty-state"><div className="empty-illustration"><Code2 size={39}/><Sparkles className="sparkle-one" size={17}/><span className="empty-orbit"/></div><h3>جاهز نبدأ التحدي؟</h3><p>أرسل المسألة، وسيقوم المدرب بتحليلها وشرح الفكرة وبناء الحل أمامك.</p><div className="empty-steps"><span><Check size={14}/> تحليل الفكرة</span><span><Check size={14}/> شرح الخوارزمية</span><span><Check size={14}/> كود قابل للنسخ</span></div></div>}
           {loading && <div className="loading-state"><div className="loading-ring"><Bot size={27}/></div><h3>نفكر في أفضل حل...</h3><p>نحلل المعطيات ونرتب خطوات الحل البرمجي.</p><div className="loading-bar"><span/></div></div>}
           {answer && <div className="answer-content" dir="rtl">
-            <div className="answer-toolbar"><span><span className="status-dot"/> تم إنشاء الشرح</span><div className="toolbar-actions"><button type="button" onClick={copyAnswer} title="نسخ الشرح"><Copy size={15}/> نسخ</button><button type="button" onClick={() => { setAnswer(""); stopSpeech(); }} title="مسح النتيجة"><RotateCcw size={15}/></button></div></div>
+            <div className="answer-toolbar"><span><span className="status-dot"/> تم إنشاء الشرح</span><div className="toolbar-actions"><button type="button" onClick={copyAnswer} title="نسخ الشرح"><Copy size={15}/> نسخ</button><button type="button" onClick={() => { setAnswer(""); setTraceSteps([]); setTraceIndex(0); stopSpeech(); }} title="مسح النتيجة"><RotateCcw size={15}/></button></div></div>
             <div className="answer-markdown" dir="rtl">{renderAnswer(answer)}</div>
+            <section className="execution-console" aria-label="محاكاة خطوات تنفيذ الخوارزمية">
+              <div className="console-topbar">
+                <div className="console-lights" aria-hidden="true"><i/><i/><i/></div>
+                <div className="console-heading"><Terminal size={15}/> ALGORITHM TRACE</div>
+                <span className={traceSteps.length ? "console-status" : "console-status unavailable"}>
+                  {traceSteps.length ? "TRACE READY" : "TRACE UNAVAILABLE"}
+                </span>
+              </div>
+              <div className="console-content" aria-live="polite">
+                {traceSteps.length > 0 ? traceSteps.map((step, index) => (
+                  <button
+                    className={index === traceIndex ? "console-step active" : "console-step"}
+                    key={index}
+                    type="button"
+                    onClick={() => setTraceIndex(index)}
+                    aria-current={index === traceIndex ? "step" : undefined}
+                  >
+                    <span className="console-number">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="console-step-text" dir="rtl">{step}</span>
+                    {index === traceIndex && <span className="console-caret" aria-hidden="true">▋</span>}
+                  </button>
+                )) : (
+                  <div className="console-empty" dir="rtl">
+                    لم يصل سجل خطوات من النموذج لهذه المسألة. أعد طلب الحل للحصول على محاكاة مفصلة.
+                  </div>
+                )}
+              </div>
+              <div className="console-controls" dir="rtl">
+                <span className="console-counter">
+                  الخطوة <b>{traceSteps.length ? traceIndex + 1 : 0}</b> من <b>{traceSteps.length}</b>
+                </span>
+                <div className="console-control-buttons">
+                  <button type="button" disabled={!traceSteps.length || traceIndex === 0} onClick={() => setTraceIndex((value) => Math.max(0, value - 1))}>
+                    <ChevronRight size={14}/> السابق
+                  </button>
+                  <button type="button" disabled={!traceSteps.length || traceIndex >= traceSteps.length - 1} onClick={() => setTraceIndex((value) => Math.min(traceSteps.length - 1, value + 1))}>
+                    التالي <ChevronLeft size={14}/>
+                  </button>
+                  <button type="button" disabled={!traceSteps.length} onClick={() => setTraceIndex(0)}>
+                    <RotateCcw size={13}/> إعادة
+                  </button>
+                </div>
+              </div>
+              <p className="console-note" dir="rtl">محاكاة تعليمية توضّح تغيّر القيم وفق المثال، وليست تشغيلاً فعلياً للكود.</p>
+            </section>
             <div className="coach-audio"><div className="audio-icon"><AudioLines size={19}/></div><div className="audio-copy"><b>المدرب الصوتي</b><small>{voiceReady ? "استمع إلى الشرح العربي بصوت المدرب" : "يتطلب الصوت دعماً من المتصفح وأصواتاً مثبتة على جهازك"}</small></div><div className="audio-controls">
               {!speaking && !paused ? <button type="button" onClick={speak} aria-label="تشغيل الشرح"><Play size={16} fill="currentColor"/></button> : <button type="button" onClick={() => { window.speechSynthesis.pause(); setPaused(true); setSpeaking(false); }} aria-label="إيقاف مؤقت"><Pause size={16}/></button>}
               {paused && <button type="button" onClick={speak} aria-label="استكمال الشرح"><Play size={15}/></button>}
