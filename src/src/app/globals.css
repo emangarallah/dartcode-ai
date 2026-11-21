@@ -99,3 +99,34 @@
 .flow-node.decision-node{border-style:dashed;border-color:#9a8048;background:#2b271c}
 .flow-node.decision-node em{flex:none;padding:3px 6px;border-radius:5px;background:#594522;color:#f2d28a;font-size:9px;font-style:normal}
 @media(max-width:520px){.flowchart-heading p{font-size:9px}.flow-terminal{font-size:10px}}
+
+
+/* Standard flowchart notation: terminators, process, decision and I/O. */
+.flow-terminal{min-width:126px;padding:10px 24px;border-radius:999px;box-shadow:0 5px 18px #0003}
+.flow-node{justify-content:center;min-height:66px;border-radius:3px}
+.flow-label{display:flex;align-items:center;gap:10px;width:100%}
+.flow-label small{flex:0 0 27px;height:27px;display:grid;place-items:center;border-radius:6px;background:#25334a;color:#a99fff;font:10px 'IBM Plex Mono',monospace}
+.flow-label>span{flex:1}
+.flow-node.process-node{border-radius:4px;border:1px solid #5279a8;background:#17283b}
+.flow-node.io-node{clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);border:0;background:#173a38;padding:12px 28px}
+.flow-node.io-node .flow-label{padding:0 10px}
+.flow-node.decision-node{width:min(100%,330px);min-height:132px;padding:0;border:0;background:transparent;position:relative;display:grid;place-items:center}
+.flow-node.decision-node:before{content:"";position:absolute;inset:10px 48px;transform:rotate(45deg);border:1px solid #c49b4d;background:#332b1c;border-radius:5px;box-shadow:0 5px 20px #0003}
+.flow-node.decision-node .flow-label{position:relative;z-index:1;width:66%;min-height:90px;display:flex;flex-direction:column;justify-content:center;gap:4px;text-align:center;padding:8px}
+.flow-node.decision-node .flow-label small{height:20px;flex-basis:20px}
+.flow-node.decision-node .flow-label>span{flex:initial;font-size:10px;line-height:1.6}
+.flow-node.decision-node.active:before{border:2px solid #65d7c1;background:#17413b;box-shadow:0 0 25px #4cd8ba33}
+.flow-node.decision-node.done:before{border-color:#3e7469;background:#15332d}
+.decision-branches{width:min(100%,330px);display:flex;justify-content:space-around;margin:-3px 0 3px;color:#e8c77d;font-size:9px}
+.decision-branches span{padding:3px 8px;border:1px solid #78633b;border-radius:6px;background:#282316}
+.flow-node.active{box-shadow:0 0 20px #4cd8ba25}
+.flow-node.io-node.active{background:#1b514a}
+.flow-node.process-node.active{border-color:#65d7c1;background:#15302d}
+@media(max-width:520px){
+ .flow-node{min-height:60px}
+ .flow-node.decision-node{min-height:122px}
+ .flow-node.decision-node:before{inset:10px 40px}
+ .flow-node.decision-node .flow-label{width:70%}
+ .flow-node.decision-node .flow-label>span{font-size:9px}
+ .decision-branches{width:100%}
+}
