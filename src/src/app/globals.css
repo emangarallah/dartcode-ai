@@ -130,3 +130,36 @@
  .flow-node.decision-node .flow-label>span{font-size:9px}
  .decision-branches{width:100%}
 }
+
+
+/* Reference-style flowchart: true split paths for decision branches */
+.algorithm-map{background:#151515;border:1px solid #3b3b3b;border-radius:14px;padding:22px}
+.algorithm-map h3{color:#fff}
+.algorithm-map .flowchart{gap:0}
+.algorithm-map .flow-terminal{background:#171717;border:2px solid #f3f3f3;color:#fff;min-width:150px;box-shadow:none}
+.algorithm-map .end-terminal{background:#171717;border-color:#f3f3f3;color:#fff}
+.algorithm-map .flow-line{height:30px;width:2px;background:#eee;overflow:visible}
+.algorithm-map .flow-line:after{border-color:#eee}
+.algorithm-map .flow-line i{display:none}
+.algorithm-map .flow-node{color:#fff;background:#171717;border:2px solid #eee;box-shadow:none;min-height:58px;font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px}
+.algorithm-map .flow-node.process-node{background:#171717;border:2px solid #eee;border-radius:12px}
+.algorithm-map .flow-node.io-node{background:#171717;border:0;outline:2px solid #eee;outline-offset:-2px;clip-path:polygon(9% 0,100% 0,91% 100%,0 100%)}
+.algorithm-map .flow-node.decision-node{min-height:140px}
+.algorithm-map .flow-node.decision-node:before{background:#171717;border:2px solid #eee;box-shadow:none}
+.algorithm-map .flow-label small{background:#292929;color:#fff}
+.algorithm-map .flow-node.active,.algorithm-map .flow-node.process-node.active{background:#17332e;border-color:#70e0c7;box-shadow:0 0 22px #70e0c733}
+.algorithm-map .flow-node.io-node.active{background:#17332e}
+.algorithm-map .flow-node.decision-node.active:before{background:#17332e;border-color:#70e0c7}
+.flow-branch-group{width:100%;display:flex;flex-direction:column;align-items:center}
+.branch-connectors{width:min(100%,620px);display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:-2px auto 0;text-align:center;color:#fff;font-size:11px;font-weight:700}
+.branch-connectors span{padding:5px;border-top:2px solid #eee;position:relative}
+.branch-connectors span:before{content:"";position:absolute;top:-2px;left:50%;height:16px;border-left:2px solid #eee}
+.flow-branch-columns{width:min(100%,620px);display:grid;grid-template-columns:1fr 1fr;gap:18px;position:relative;padding-top:14px}
+.flow-branch-column{display:flex;justify-content:center;position:relative}
+.flow-branch-column:before{content:"";position:absolute;top:-14px;height:14px;border-left:2px solid #eee}
+.flow-branch-column .branch-node{width:100%;max-width:270px}
+.branch-merge-line{height:28px;width:min(100%,620px);border-bottom:2px solid #eee;position:relative;margin-bottom:0}
+.branch-merge-line:before,.branch-merge-line:after{content:"";position:absolute;top:0;height:28px;border-left:2px solid #eee}
+.branch-merge-line:before{left:25%}.branch-merge-line:after{right:25%}
+.branch-merge-line i{position:absolute;bottom:-1px;left:50%;height:28px;border-left:2px solid #eee}
+@media(max-width:520px){.algorithm-map{padding:12px}.flow-branch-columns,.branch-connectors{gap:8px}.flow-branch-column .branch-node{min-height:76px;padding:7px 5px;font-size:10px}.flow-branch-column .flow-label{gap:4px}.flow-branch-column .flow-label small{display:none}.branch-merge-line{width:100%}}
