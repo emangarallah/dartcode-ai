@@ -37,20 +37,34 @@ function extractExecutionTrace(markdown: string): { content: string; steps: stri
   const lines = markdown.split(/\r?\n/);
   const heading = /^##\s+(?:مخطط سير الخوارزمية|تتبّع التنفيذ|تتبع التنفيذ)\s*$/;
   const start = lines.findIndex((line) => heading.test(line.trim()));
-  if (start < 0) return { content: markdown, steps: [] };
+  const methodStart = start < 0
+    ? lines.findIndex((line) => /^##\s+طريقة الحل\s*$/.test(line.trim()))
+    : start;
+  if (methodStart < 0) return { content: markdown, steps: [] };
 
-  let end = lines.findIndex((line, index) => index > start && /^##\s+/.test(line.trim()));
+  let end = lines.findIndex((line, index) => index > methodStart && /^##\s+/.test(line.trim()));
   if (end < 0) end = lines.length;
 
-  const steps = lines
-    .slice(start + 1, end)
+  let steps = lines
+    .slice(methodStart + 1, end)
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && !line.startsWith("```"))
     .map((line) => line.replace(/^[-*]\s*/, "").replace(/^\d+[.)]\s*/, "").trim())
     .filter(Boolean);
 
-  const content = [...lines.slice(0, start), ...lines.slice(end)].join("\n").trim();
-  return { content, steps };
+  if (steps.length === 0) {
+    steps = lines.slice(methodStart + 1, end)
+      .join(" ")
+      .split(/[.!؟؛]\s+/)
+      .map((step) => step.trim())
+      .filter((step) => step.length > 18)
+      .slice(0, 7);
+  }
+
+  const content = start < 0
+    ? markdown
+    : [...lines.slice(0, start), ...lines.slice(end)].join("\n").trim();
+  return { content, steps: steps.slice(0, 8) };
 }
 
 
