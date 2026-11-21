@@ -65,3 +65,25 @@
 @keyframes flowSignal{to{transform:translateY(460%)}}
 @media(prefers-reduced-motion:reduce){.flow-item,.flow-node,.flow-line i{animation:none!important;transition:none!important}}
 @media(max-width:520px){.algorithm-map{padding:13px}.flow-node{font-size:10px;padding:8px 9px}.flow-line{height:19px}}
+
+
+/* Big-O complexity chart */
+.complexity-chart{margin:20px 0;padding:17px;border:1px solid #293344;border-radius:13px;background:linear-gradient(145deg,#111824,#0b1018);overflow:hidden}
+.chart-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.chart-heading h3{font-size:14px;color:#e1e8f5;margin:0 0 5px}
+.chart-heading p{font-size:10px;color:#8592a8;margin:0;line-height:1.8}
+.chart-tag{font:10px 'IBM Plex Mono',monospace;color:#b4aaff;border:1px solid #8b7cff55;background:#8b7cff14;border-radius:6px;padding:6px 8px}
+.chart-scroll{width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.complexity-svg{display:block;width:100%;min-width:390px;height:auto;overflow:visible}
+.chart-gridline{stroke:#293445;stroke-width:1;stroke-dasharray:3 5}
+.chart-axis{stroke:#64748b;stroke-width:1.2}
+.chart-tick,.chart-axis-label{fill:#8390a5;font:10px 'IBM Plex Sans Arabic',sans-serif}
+.chart-axis-label{font-size:10px}
+.chart-line{transition:opacity .25s,stroke-width .25s}
+.chart-line.selected{filter:drop-shadow(0 0 5px currentColor)}
+.chart-legend{display:flex;align-items:center;gap:9px 15px;flex-wrap:wrap;margin-top:8px}
+.chart-legend-item{display:flex;align-items:center;gap:6px;color:#8996aa;font:10px 'IBM Plex Mono',monospace;opacity:.65;transition:opacity .2s}
+.chart-legend-item.selected{opacity:1;color:#e7eaf2}
+.chart-legend-item i{width:16px;height:3px;border-radius:5px;display:inline-block}
+.chart-footnote{margin:12px 0 0;color:#77869b;font-size:10px;line-height:1.8}
+@media(max-width:520px){.complexity-chart{padding:13px}.chart-heading h3{font-size:12px}.chart-heading p{font-size:9px}.complexity-svg{min-width:420px}.chart-legend{gap:9px 11px}.chart-legend-item{font-size:9px}}
