@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { AudioLines, BookOpen, Bot, Check, ChevronDown, ChevronLeft, ChevronRight, CircleStop, Code2, Copy, ExternalLink, Headphones, Loader2, Pause, Play, RotateCcw, Send, Sparkles, Terminal, Volume2 } from "lucide-react";
 
 type Difficulty = "Easy" | "Medium" | "Hard";
@@ -68,6 +68,8 @@ export default function HomePage() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [voiceReady, setVoiceReady] = useState(false);
+  const speechQueueRef = useRef<string[]>([]);
+  const speechCursorRef = useRef(0);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -87,23 +89,62 @@ export default function HomePage() {
 
   function stopSpeech() {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    speechQueueRef.current = [];
+    speechCursorRef.current = 0;
     setSpeaking(false); setPaused(false);
   }
 
   function speak() {
-    if (!spokenText.trim() || !("speechSynthesis" in window)) return;
-    if (paused) { window.speechSynthesis.resume(); setPaused(false); setSpeaking(true); return; }
+    if (!("speechSynthesis" in window)) return;
+    if (paused) {
+      window.speechSynthesis.resume();
+      setPaused(false);
+      setSpeaking(true);
+      return;
+    }
+    if (speaking) return;
+
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(spokenText);
+    const segments = traceSteps.length
+      ? traceSteps.map((step, index) => `الخطوة ${index + 1}. ${step}`)
+      : [spokenText];
+    if (!segments.some((segment) => segment.trim())) return;
+
+    speechQueueRef.current = segments;
+    speechCursorRef.current = 0;
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang.toLowerCase().startsWith("ar")) || voices.find(v => v.lang.toLowerCase().startsWith("en"));
-    if (preferred) utterance.voice = preferred;
-    utterance.lang = preferred?.lang || "ar";
-    utterance.rate = 0.94;
-    utterance.onend = () => { setSpeaking(false); setPaused(false); };
-    utterance.onerror = () => { setSpeaking(false); setPaused(false); };
-    window.speechSynthesis.speak(utterance);
-    setSpeaking(true); setPaused(false);
+    const preferred = voices.find((voice) => voice.lang.toLowerCase().startsWith("ar"))
+      || voices.find((voice) => voice.lang.toLowerCase().startsWith("en"));
+
+    const speakNext = () => {
+      const index = speechCursorRef.current;
+      const segment = speechQueueRef.current[index];
+      if (!segment) {
+        setSpeaking(false);
+        setPaused(false);
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(segment);
+      if (preferred) utterance.voice = preferred;
+      utterance.lang = preferred?.lang || "ar";
+      utterance.rate = 0.94;
+      utterance.onstart = () => {
+        if (traceSteps.length) setTraceIndex(index);
+      };
+      utterance.onend = () => {
+        speechCursorRef.current += 1;
+        speakNext();
+      };
+      utterance.onerror = () => {
+        setSpeaking(false);
+        setPaused(false);
+      };
+      window.speechSynthesis.speak(utterance);
+    };
+
+    setSpeaking(true);
+    setPaused(false);
+    speakNext();
   }
 
   async function solve(event: FormEvent<HTMLFormElement>) {
@@ -241,12 +282,12 @@ export default function HomePage() {
                 ))}
               </div>
             </section>
-            <div className="coach-audio"><div className="audio-icon"><AudioLines size={19}/></div><div className="audio-copy"><b>المدرب الصوتي</b><small>{voiceReady ? "استمع إلى الشرح العربي بصوت المدرب" : "يتطلب الصوت دعماً من المتصفح وأصواتاً مثبتة على جهازك"}</small></div><div className="audio-controls">
+            <div className="coach-audio"><div className="audio-icon"><AudioLines size={19}/></div><div className="audio-copy"><b>المدرب الصوتي</b><small>{voiceReady ? "يتزامن صوت المدرب مع إبراز كل خطوة في المخطط" : "يتطلب الصوت دعماً من المتصفح وأصواتاً مثبتة على جهازك"}</small></div><div className="audio-controls">
               {!speaking && !paused ? <button type="button" onClick={speak} aria-label="تشغيل الشرح"><Play size={16} fill="currentColor"/></button> : <button type="button" onClick={() => { window.speechSynthesis.pause(); setPaused(true); setSpeaking(false); }} aria-label="إيقاف مؤقت"><Pause size={16}/></button>}
               {paused && <button type="button" onClick={speak} aria-label="استكمال الشرح"><Play size={15}/></button>}
               <button type="button" onClick={stopSpeech} aria-label="إيقاف الصوت"><CircleStop size={16}/></button>
             </div></div>
-            <p className="audio-hint"><Volume2 size={13}/> يقرأ المدرب الشرح بالعربية ويتجاوز مقاطع الكود حتى يبقى الكود باللغة الإنجليزية فقط.</p>
+            <p className="audio-hint"><Volume2 size={13}/> يشرح المدرب خطوات التتبّع بالتتابع؛ ويتحرك تمييز المخطط تلقائياً مع كل خطوة. يتم تجاوز مقاطع الكود.</p>
           </div>}
         </section>
       </div>
