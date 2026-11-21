@@ -228,6 +228,19 @@ export default function HomePage() {
               </div>
               <p className="console-note" dir="rtl">محاكاة تعليمية توضّح تغيّر القيم وفق المثال، وليست تشغيلاً فعلياً للكود.</p>
             </section>
+            <section className="algorithm-map" dir="rtl">
+              <h3>مخطط سير الخوارزمية</h3>
+              <div className="flowchart">
+                {traceSteps.map((step, index) => (
+                  <div className="flow-item" key={index}>
+                    <button type="button" className={index === traceIndex ? "flow-node active" : index < traceIndex ? "flow-node done" : "flow-node"} onClick={() => setTraceIndex(index)}>
+                      <small>{String(index + 1).padStart(2, "0")}</small><span>{step}</span>
+                    </button>
+                    {index < traceSteps.length - 1 && <div className="flow-line"><i/></div>}
+                  </div>
+                ))}
+              </div>
+            </section>
             <div className="coach-audio"><div className="audio-icon"><AudioLines size={19}/></div><div className="audio-copy"><b>المدرب الصوتي</b><small>{voiceReady ? "استمع إلى الشرح العربي بصوت المدرب" : "يتطلب الصوت دعماً من المتصفح وأصواتاً مثبتة على جهازك"}</small></div><div className="audio-controls">
               {!speaking && !paused ? <button type="button" onClick={speak} aria-label="تشغيل الشرح"><Play size={16} fill="currentColor"/></button> : <button type="button" onClick={() => { window.speechSynthesis.pause(); setPaused(true); setSpeaking(false); }} aria-label="إيقاف مؤقت"><Pause size={16}/></button>}
               {paused && <button type="button" onClick={speak} aria-label="استكمال الشرح"><Play size={15}/></button>}
