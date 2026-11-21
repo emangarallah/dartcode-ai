@@ -35,7 +35,7 @@ function renderAnswer(markdown: string) {
 
 function extractExecutionTrace(markdown: string): { content: string; steps: string[] } {
   const lines = markdown.split(/\r?\n/);
-  const heading = /^##\s+(?:تتبّع التنفيذ|تتبع التنفيذ)\s*$/;
+  const heading = /^##\s+(?:مخطط سير الخوارزمية|تتبّع التنفيذ|تتبع التنفيذ)\s*$/;
   const start = lines.findIndex((line) => heading.test(line.trim()));
   if (start < 0) return { content: markdown, steps: [] };
 
@@ -317,16 +317,20 @@ export default function HomePage() {
               <p className="console-note" dir="rtl">محاكاة تعليمية توضّح تغيّر القيم وفق المثال، وليست تشغيلاً فعلياً للكود.</p>
             </section>
             <section className="algorithm-map" dir="rtl">
-              <h3>مخطط سير الخوارزمية</h3>
+              <div className="flowchart-heading"><div><h3>مخطط تدفق الحل لهذه المسألة</h3><p>يتغير المخطط تلقائياً بحسب خطوات الخوارزمية الحالية</p></div><span>{traceSteps.length} خطوات</span></div>
               <div className="flowchart">
-                {traceSteps.map((step, index) => (
-                  <div className="flow-item" key={index}>
-                    <button type="button" className={index === traceIndex ? "flow-node active" : index < traceIndex ? "flow-node done" : "flow-node"} onClick={() => setTraceIndex(index)}>
-                      <small>{String(index + 1).padStart(2, "0")}</small><span>{step}</span>
+                <div className="flow-terminal">بداية</div>
+                <div className="flow-line"><i/></div>
+                {traceSteps.map((step, index) => {
+                  const decision = /إذا|هل |تحقق|مقارنة|شرط|otherwise|if\b/i.test(step);
+                  return <div className="flow-item" key={index}>
+                    <button type="button" className={`flow-node ${decision ? "decision-node " : ""}${index === traceIndex ? "active" : index < traceIndex ? "done" : ""}`} onClick={() => setTraceIndex(index)}>
+                      <small>{String(index + 1).padStart(2, "0")}</small><span>{step}</span>{decision && <em>قرار</em>}
                     </button>
-                    {index < traceSteps.length - 1 && <div className="flow-line"><i/></div>}
-                  </div>
-                ))}
+                    <div className="flow-line"><i/></div>
+                  </div>;
+                })}
+                <div className="flow-terminal end-terminal">النهاية · إرجاع النتيجة</div>
               </div>
             </section>
             <ComplexityChart answer={answer} />
