@@ -87,3 +87,15 @@
 .chart-legend-item i{width:16px;height:3px;border-radius:5px;display:inline-block}
 .chart-footnote{margin:12px 0 0;color:#77869b;font-size:10px;line-height:1.8}
 @media(max-width:520px){.complexity-chart{padding:13px}.chart-heading h3{font-size:12px}.chart-heading p{font-size:9px}.complexity-svg{min-width:420px}.chart-legend{gap:9px 11px}.chart-legend-item{font-size:9px}}
+
+
+/* Per-problem flowchart terminals and decision nodes */
+.flowchart-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.flowchart-heading h3{margin:0 0 5px}
+.flowchart-heading p{margin:0;color:#8290a5;font-size:10px;line-height:1.7}
+.flowchart-heading>span{flex:none;padding:5px 8px;border-radius:7px;background:#172d2b;color:#7ce0c8;font:10px 'IBM Plex Mono',monospace}
+.flow-terminal{min-width:112px;padding:8px 22px;border:1px solid #3d8f7e;border-radius:999px;background:#12312d;color:#a8f2df;text-align:center;font-size:11px;font-weight:700}
+.end-terminal{border-color:#8a7448;background:#332a19;color:#f1d59a}
+.flow-node.decision-node{border-style:dashed;border-color:#9a8048;background:#2b271c}
+.flow-node.decision-node em{flex:none;padding:3px 6px;border-radius:5px;background:#594522;color:#f2d28a;font-size:9px;font-style:normal}
+@media(max-width:520px){.flowchart-heading p{font-size:9px}.flow-terminal{font-size:10px}}
